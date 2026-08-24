@@ -95,17 +95,16 @@ Python 3.13.14.
 
 | case | Mojo | Featuretools/pandas | speedup | result |
 | --- | ---: | ---: | ---: | --- |
-| Sum (10M) | 10.10 ms | 94.57 ms | 9.36x | faster |
-| CumSum (5M) | 33.45 ms | 117.55 ms | 3.51x | faster |
-| RollingMean (20k, window 128) | 0.10 ms | 1699.85 ms | 16753.27x | faster |
-| RollingSTD (20k, window 128) | 0.23 ms | 2119.25 ms | 9273.89x | faster |
-| Sine (5M) | 20.96 ms | 128.95 ms | 6.15x | faster |
-| Grouped 6-aggregate (5M, 1k groups) | 120.33 ms | 808.85 ms | 6.72x | faster |
+| Sum (10M) | 10.30 ms | 586.55 ms | 56.94x | faster |
+| CumSum (5M) | 24.28 ms | 305.54 ms | 12.58x | faster |
+| RollingMean (20k, window 128) | 0.10 ms | 1707.74 ms | 16429.74x | faster |
+| RollingSTD (20k, window 128) | 0.18 ms | 2125.97 ms | 12123.27x | faster |
+| Sine (5M) | 174.96 ms | 592.61 ms | 3.39x | faster |
+| Grouped 6-aggregate (5M, 1k groups) | 118.80 ms | 2437.05 ms | 20.51x | faster |
 
 Sum uses a NaN-masked SIMD reduction. Sine uses SIMD with scalar remainder
-handling and switches to thresholded CPU parallelism for large arrays. NumPy
-`float64` inputs remain zero-copy through the pandas-compatible wrapper and
-the FFI boundary.
+handling. NumPy `float64` inputs remain zero-copy through the pandas-compatible
+wrapper and the FFI boundary.
 
 No GPU path is included. Sine is the only covered kernel with enough arithmetic
 intensity to be a candidate, but the pinned Mojo NVIDIA backend rejects
