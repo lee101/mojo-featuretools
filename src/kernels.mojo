@@ -1,14 +1,10 @@
 """Numeric Featuretools primitives over caller-owned float64 buffers."""
 
-from std.algorithm import parallelize
-from std.gpu.host import DeviceContext
 from std.math import abs, cos, isnan, log, sin, sqrt, tan
 from std.sys.info import simd_width_of as simdwidthof
 
 comptime FPtr = UnsafePointer[Float64, AnyOrigin[mut=True]]
 comptime IPtr = UnsafePointer[Int64, AnyOrigin[mut=True]]
-comptime PARALLEL_UNARY_THRESHOLD = 262_144
-comptime PARALLEL_UNARY_CHUNKS = 16
 
 
 def fp(addr: Int) -> FPtr:
@@ -35,24 +31,7 @@ def sine_range(src: FPtr, dst: FPtr, start: Int, end: Int):
 
 
 def sine_transform(src: FPtr, dst: FPtr, n: Int):
-    if n < PARALLEL_UNARY_THRESHOLD:
-        sine_range(src, dst, 0, n)
-        return
-
-    var chunk_size = (n + PARALLEL_UNARY_CHUNKS - 1) // PARALLEL_UNARY_CHUNKS
-
-    @parameter
-    def work(chunk: Int):
-        var start = chunk * chunk_size
-        var end = min(start + chunk_size, n)
-        if start < end:
-            sine_range(src, dst, start, end)
-
-    try:
-        var ctx = DeviceContext(api="cpu")
-        parallelize[work](PARALLEL_UNARY_CHUNKS, ctx)
-    except:
-        sine_range(src, dst, 0, n)
+    sine_range(src, dst, 0, n)
 
 
 def unary(src: FPtr, dst: FPtr, n: Int, op: Int):
