@@ -24,7 +24,7 @@ def sine_range(src: FPtr, dst: FPtr, start: Int, end: Int):
     comptime W = simdwidthof[DType.float64]()
     var stop = start + (end - start) // W * W
     for i in range(start, stop, W):
-        var values = src.load[width=W](i)
+        var values = src.unsafe_load[width=W](i)
         dst.store(i, sin(values))
     for i in range(stop, end):
         dst[i] = sin(src[i])
@@ -57,7 +57,7 @@ def reduce_sum(src: FPtr, n: Int) -> Float64:
     var vector_total = SIMD[DType.float64, W](0.0)
     var stop = n - n % W
     for i in range(0, stop, W):
-        var values = src.load[width=W](i)
+        var values = src.unsafe_load[width=W](i)
         vector_total += isnan(values).select(0.0, values)
     var total = vector_total.reduce_add()
     for i in range(stop, n):
